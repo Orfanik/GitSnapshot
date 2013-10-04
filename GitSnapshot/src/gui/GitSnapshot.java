@@ -18,12 +18,12 @@ import javax.swing.DefaultListModel;
  *
  * @author U292156
  */
-public class GitPackages extends javax.swing.JDialog {
+public class GitSnapshot extends javax.swing.JDialog {
 
     /**
-     * Creates new form GitPackages
+     * Creates new form GitSnapshot
      */
-    public GitPackages(java.awt.Frame parent, boolean modal) {
+    public GitSnapshot(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         
@@ -52,7 +52,7 @@ public class GitPackages extends javax.swing.JDialog {
             }
         } catch (IOException ex) {
             model.addElement(ex);
-            Logger.getLogger(GitPackages.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GitSnapshot.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -156,13 +156,13 @@ public class GitPackages extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(GitPackages.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GitSnapshot.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(GitPackages.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GitSnapshot.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(GitPackages.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GitSnapshot.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(GitPackages.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GitSnapshot.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
@@ -170,7 +170,7 @@ public class GitPackages extends javax.swing.JDialog {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                GitPackages dialog = new GitPackages(new javax.swing.JFrame(), true);
+                GitSnapshot dialog = new GitSnapshot(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
