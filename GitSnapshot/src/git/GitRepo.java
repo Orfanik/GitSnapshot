@@ -15,14 +15,20 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.treewalk.TreeWalk;
 
 /**
  *
@@ -53,7 +59,7 @@ public class GitRepo {
   }
   
   public HashMap getComments(String filterText) throws IOException {
-    HashMap<String, String> comments = new HashMap<String, String>();
+    HashMap<String, RevCommit> comments = new HashMap<>();
     
     try {
         Git git = new Git(repository);
@@ -68,7 +74,7 @@ public class GitRepo {
               }
             }
             if (filterOk) {
-              comments.put(commit.getId().getName(), commit.getFullMessage());
+              comments.put(commit.getId().getName(), commit);
             }
         }    
     } catch (GitAPIException ex) {
@@ -76,6 +82,23 @@ public class GitRepo {
     }
     return comments;
   }
+
+  public ArrayList<String> getFilelistForComment(RevCommit commit)
+    throws RevisionSyntaxException, AmbiguousObjectException,
+    IncorrectObjectTypeException, IOException {
+      
+    ArrayList<String> ret = new ArrayList<>();
+    TreeWalk treeWalk = new TreeWalk(repository);
+    treeWalk.setRecursive(true);
+    treeWalk.addTree(commit.getTree());
+    while (treeWalk.next()) {
+      treeWalk.getRawPath();
+      ret.add(treeWalk.getPathString());
+    }
+    treeWalk.release();
+    return ret;
+  }
+
   
 }
 
