@@ -43,7 +43,7 @@ public class GitSnapshot extends javax.swing.JDialog {
             
             model.addElement(" ");
             model.addElement("Comments");
-            HashMap<String, RevCommit> comments = repo.getComments("DBWG-28");
+            HashMap<String, RevCommit> comments = repo.getComments("DBWG-29");
             it = comments.keySet().iterator();
             while (it.hasNext()) {
                 String key = (String) it.next();

@@ -22,13 +22,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 /**
  *
@@ -86,16 +91,26 @@ public class GitRepo {
   public ArrayList<String> getFilelistForComment(RevCommit commit)
     throws RevisionSyntaxException, AmbiguousObjectException,
     IncorrectObjectTypeException, IOException {
-      
+
     ArrayList<String> ret = new ArrayList<>();
-    TreeWalk treeWalk = new TreeWalk(repository);
-    treeWalk.setRecursive(true);
-    treeWalk.addTree(commit.getTree());
-    while (treeWalk.next()) {
-      treeWalk.getRawPath();
-      ret.add(treeWalk.getPathString());
+      
+    if (commit.getParentCount() > 0) {
+        RevCommit parentCommit = commit.getParent(0);
+        DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
+        df.setRepository(repository);
+        df.setDiffComparator(RawTextComparator.DEFAULT);
+        df.setDetectRenames(true);
+
+        List<DiffEntry> diffs = null;
+        try {
+          diffs = df.scan(parentCommit.getTree(), commit.getTree());
+        } catch (IOException e) {
+                e.printStackTrace();
+        }
+        for (DiffEntry diff : diffs) {
+          ret.add(diff.getNewPath());
+        }
     }
-    treeWalk.release();
     return ret;
   }
 
