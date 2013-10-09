@@ -13,6 +13,8 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 /**
@@ -52,9 +54,19 @@ public class GitSnapshot extends javax.swing.JDialog {
                 model.addElement(key);
                 model.addElement(commit.getFullMessage());
                 model.addElement("Files:");
-                ArrayList<String> fileList = repo.getFilelistForComment(commit);
-                for (String fileName : fileList ) {
-                    model.addElement(fileName);
+                HashMap<ObjectId, String> fileList = repo.getFilelistForComment(commit);
+                Iterator itf = fileList.keySet().iterator();
+                while (itf.hasNext()) {
+                    ObjectId fname = (ObjectId)itf.next();
+                    model.addElement(fname.getName());
+                    model.addElement(fileList.get(fname));
+                    model.addElement(" ");
+                    ArrayList<String> tartalom = repo.open(fname);
+                    
+                    Iterator its = tartalom.iterator();
+                    while (its.hasNext()) {
+                        model.addElement(its.next());
+                    }
                 }
             }
         } catch (IOException ex) {

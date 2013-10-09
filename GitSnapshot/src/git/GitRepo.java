@@ -7,6 +7,7 @@ package git;
 
 //~--- non-JDK imports --------------------------------------------------------
 
+import java.io.BufferedReader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
@@ -14,6 +15,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,9 +29,11 @@ import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.ObjectStream;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -50,6 +54,23 @@ public class GitRepo {
       .build();
   }
 
+  /**
+   *
+   * @param object
+   */
+  public ArrayList<String> open(ObjectId object) throws MissingObjectException, IOException {
+      ObjectLoader loader = repository.open(object);
+      ArrayList<String> tartalom = new ArrayList<>();
+      
+      ObjectStream ost = loader.openStream();  
+      BufferedReader reader = new BufferedReader( new InputStreamReader( ost ) );   
+      for(String line = reader.readLine(); line != null; line = reader.readLine()) {
+        tartalom.add(line);
+      }
+      return tartalom;
+      
+  }
+  
   public ArrayList getBranches() {
     ArrayList<String> branches = new ArrayList<>();
     try {
@@ -88,11 +109,11 @@ public class GitRepo {
     return comments;
   }
 
-  public ArrayList<String> getFilelistForComment(RevCommit commit)
+  public HashMap<ObjectId, String> getFilelistForComment(RevCommit commit)
     throws RevisionSyntaxException, AmbiguousObjectException,
     IncorrectObjectTypeException, IOException {
 
-    ArrayList<String> ret = new ArrayList<>();
+    HashMap<ObjectId, String> files = new HashMap<>();
       
     if (commit.getParentCount() > 0) {
         RevCommit parentCommit = commit.getParent(0);
@@ -108,10 +129,15 @@ public class GitRepo {
                 e.printStackTrace();
         }
         for (DiffEntry diff : diffs) {
-          ret.add(diff.getNewPath());
+            
+            
+//            ObjectLoader loader = repository.open(objectId);
+            // and then one can the loader to read the file
+//            loader.copyTo(System.out);               
+          files.put((ObjectId)diff.getNewId().toObjectId(), diff.getNewPath());
         }
     }
-    return ret;
+    return files;
   }
 
   
