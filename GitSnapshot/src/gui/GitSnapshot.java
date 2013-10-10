@@ -210,11 +210,16 @@ public class GitSnapshot extends javax.swing.JDialog {
         DefaultListModel model = (DefaultListModel) ctrlMessages.getModel();
         ArrayList<String> commits = new ArrayList<>(); 
         ArrayList<String> files = new ArrayList<>(); 
+        String wrkDir = ctrlRepository.getText();
+        String outZipPath = wrkDir;
+        String outZipname = ctrlZipFilePrefix.getText()+"-"+ctrlIssueId.getText()+".zip";
+        model.addElement(outZipname);
+        model.addElement("");
 
         try {
             /// Test
         
-            GitRepo repo = new GitRepo(ctrlRepository.getText());
+            GitRepo repo = new GitRepo(wrkDir);
             ArrayList<String> branches = repo.getBranches();
             Iterator it = branches.iterator();
             model.addElement("Branches:");
@@ -224,6 +229,10 @@ public class GitSnapshot extends javax.swing.JDialog {
             
             model.addElement(" ");
             model.addElement("Comments");
+            ZipOutputStream zar = new ZipOutputStream(new FileOutputStream(outZipname));
+            HashMap<String, ObjectId> sumfileList = new HashMap<>();
+            int lastTimeStamp = -1;
+
             HashMap<String, RevCommit> comments = repo.getComments("DBWG-29");
             it = comments.keySet().iterator();
             while (it.hasNext()) {
@@ -232,36 +241,35 @@ public class GitSnapshot extends javax.swing.JDialog {
                 model.addElement(" ");
                 model.addElement(key);
                 model.addElement(commit.getFullMessage());
+                model.addElement(commit.getCommitTime());
                 model.addElement("Files:");
+
                 HashMap<ObjectId, String> fileList = repo.getFilelistForComment(commit);
-                Iterator itf = fileList.keySet().iterator();
-                while (itf.hasNext()) {
-                    ObjectId fname = (ObjectId)itf.next();
-                    model.addElement(fname.getName());
-                    model.addElement(fileList.get(fname));
-                    model.addElement(" ");
-                    ArrayList<String> tartalom = repo.open(fname);
-                    
-                    Iterator its = tartalom.iterator();
-                    while (its.hasNext()) {
-                        model.addElement(its.next());
+                for (ObjectId fname : fileList.keySet()) {
+                    if (lastTimeStamp < commit.getCommitTime()) {
+                      sumfileList.put(fileList.get(fname), fname);
+                    } else {
+                      if (!sumfileList.containsKey(fileList.get(fname))) {
+                          sumfileList.put(fileList.get(fname), fname);
+                      }  
                     }
                 }
+                lastTimeStamp = commit.getCommitTime();
+            }
+            for (String fname : sumfileList.keySet()) {
+                model.addElement(fname);
+                byte[] tartalom = repo.open(sumfileList.get(fname));
             }
         } catch (IOException ex) {
             model.addElement(ex);
             Logger.getLogger(GitSnapshot.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+        /*
     try {
       // TODO add your handling code here:
-      String wrkDir = ctrlRepository.getText();
       String line;
-      String outZipPath = wrkDir;
-      String outZipname = ctrlZipFilePrefix.getText()+"-"+ctrlIssueId.getText()+".zip";
       Iterator<String> it;
-      model.addElement(outZipname);
-      model.addElement("");
     
       ProcessBuilder pb = new ProcessBuilder("git", "log", "--grep="+ctrlIssueId.getText());
       pb.directory(new File(wrkDir));
@@ -327,7 +335,7 @@ public class GitSnapshot extends javax.swing.JDialog {
       model.addElement(ex);
       Logger.getLogger(GitSnapshot.class.getName()).log(Level.SEVERE, null, ex);
     }
-        
+        */
     }//GEN-LAST:event_ctrlStartActionPerformed
 
     private void ctrlOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlOkActionPerformed

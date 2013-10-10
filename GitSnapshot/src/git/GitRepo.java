@@ -58,17 +58,9 @@ public class GitRepo {
    *
    * @param object
    */
-  public ArrayList<String> open(ObjectId object) throws MissingObjectException, IOException {
+  public byte[] open(ObjectId object) throws MissingObjectException, IOException {
       ObjectLoader loader = repository.open(object);
-      ArrayList<String> tartalom = new ArrayList<>();
-      
-      ObjectStream ost = loader.openStream();  
-      BufferedReader reader = new BufferedReader( new InputStreamReader( ost ) );   
-      for(String line = reader.readLine(); line != null; line = reader.readLine()) {
-        tartalom.add(line);
-      }
-      return tartalom;
-      
+      return loader.getCachedBytes();
   }
   
   public ArrayList getBranches() {
