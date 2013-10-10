@@ -6,13 +6,21 @@ package gui;
 
 import git.GitRepo;
 import java.awt.Frame;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import org.eclipse.jgit.lib.ObjectId;
@@ -31,50 +39,8 @@ public class GitSnapshot extends javax.swing.JDialog {
     public GitSnapshot(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        
         DefaultListModel model = new DefaultListModel();
         ctrlMessages.setModel(model);
-        
-        try {
-            /// Test
-            GitRepo repo = new GitRepo("d:\\lsyh\\deskbase\\cmsweb");
-            ArrayList<String> branches = repo.getBranches();
-            Iterator it = branches.iterator();
-            model.addElement("Branches:");
-            while (it.hasNext()) {
-                model.addElement(it.next());
-            }
-            
-            model.addElement(" ");
-            model.addElement("Comments");
-            HashMap<String, RevCommit> comments = repo.getComments("DBWG-29");
-            it = comments.keySet().iterator();
-            while (it.hasNext()) {
-                String key = (String) it.next();
-                RevCommit commit = comments.get(key);
-                model.addElement(" ");
-                model.addElement(key);
-                model.addElement(commit.getFullMessage());
-                model.addElement("Files:");
-                HashMap<ObjectId, String> fileList = repo.getFilelistForComment(commit);
-                Iterator itf = fileList.keySet().iterator();
-                while (itf.hasNext()) {
-                    ObjectId fname = (ObjectId)itf.next();
-                    model.addElement(fname.getName());
-                    model.addElement(fileList.get(fname));
-                    model.addElement(" ");
-                    ArrayList<String> tartalom = repo.open(fname);
-                    
-                    Iterator its = tartalom.iterator();
-                    while (its.hasNext()) {
-                        model.addElement(its.next());
-                    }
-                }
-            }
-        } catch (IOException ex) {
-            model.addElement(ex);
-            Logger.getLogger(GitSnapshot.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     /**
@@ -241,6 +207,127 @@ public class GitSnapshot extends javax.swing.JDialog {
 
     private void ctrlStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlStartActionPerformed
         // TODO add your handling code here:
+        DefaultListModel model = (DefaultListModel) ctrlMessages.getModel();
+        ArrayList<String> commits = new ArrayList<>(); 
+        ArrayList<String> files = new ArrayList<>(); 
+
+        try {
+            /// Test
+        
+            GitRepo repo = new GitRepo(ctrlRepository.getText());
+            ArrayList<String> branches = repo.getBranches();
+            Iterator it = branches.iterator();
+            model.addElement("Branches:");
+            while (it.hasNext()) {
+                model.addElement(it.next());
+            }
+            
+            model.addElement(" ");
+            model.addElement("Comments");
+            HashMap<String, RevCommit> comments = repo.getComments("DBWG-29");
+            it = comments.keySet().iterator();
+            while (it.hasNext()) {
+                String key = (String) it.next();
+                RevCommit commit = comments.get(key);
+                model.addElement(" ");
+                model.addElement(key);
+                model.addElement(commit.getFullMessage());
+                model.addElement("Files:");
+                HashMap<ObjectId, String> fileList = repo.getFilelistForComment(commit);
+                Iterator itf = fileList.keySet().iterator();
+                while (itf.hasNext()) {
+                    ObjectId fname = (ObjectId)itf.next();
+                    model.addElement(fname.getName());
+                    model.addElement(fileList.get(fname));
+                    model.addElement(" ");
+                    ArrayList<String> tartalom = repo.open(fname);
+                    
+                    Iterator its = tartalom.iterator();
+                    while (its.hasNext()) {
+                        model.addElement(its.next());
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            model.addElement(ex);
+            Logger.getLogger(GitSnapshot.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    try {
+      // TODO add your handling code here:
+      String wrkDir = ctrlRepository.getText();
+      String line;
+      String outZipPath = wrkDir;
+      String outZipname = ctrlZipFilePrefix.getText()+"-"+ctrlIssueId.getText()+".zip";
+      Iterator<String> it;
+      model.addElement(outZipname);
+      model.addElement("");
+    
+      ProcessBuilder pb = new ProcessBuilder("git", "log", "--grep="+ctrlIssueId.getText());
+      pb.directory(new File(wrkDir));
+      //model.addElement(Arrays.deepToString(pb.command().toArray()));
+      //pb.redirectOutput(Redirect.INHERIT);
+      //pb.redirectError(Redirect.INHERIT);
+      Process p = pb.start();
+            
+      BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+      while ((line = input.readLine()) != null) {
+        if (line.contains("commit")) {
+          commits.add(line.substring(7));
+        } else if (line.contains("Author:") || line.contains("Date:")) {
+          model.addElement(line);
+        }
+      }
+      input.close();
+
+      it = commits.iterator();
+      while (it.hasNext()) {
+        String commitHash = it.next();
+        pb = new ProcessBuilder("git", "show",  "--pretty=format:", "--name-only", commitHash);
+        pb.directory(new File(wrkDir));
+        //pb.redirectOutput(Redirect.INHERIT);
+        //pb.redirectError(Redirect.INHERIT);
+        p = pb.start();
+
+        input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        while ((line = input.readLine()) != null) {
+          if (!line.isEmpty() && !files.contains(line)) {
+            files.add(line);
+          }
+        }
+        input.close();
+      }      
+
+      Collections.sort(files);
+      
+      ZipOutputStream zar = new ZipOutputStream(new FileOutputStream(outZipname));
+      it = files.iterator();
+ 
+      while (it.hasNext()) {
+        String changedFile = it.next();
+        
+        try {
+          FileInputStream fis = new FileInputStream(wrkDir + File.separator + changedFile);            
+          zar.putNextEntry(new ZipEntry(changedFile));
+          int len;
+          byte[] buf = new byte[1024];
+          while ((len = fis.read(buf)) > 0)
+            zar.write(buf, 0, len);
+          zar.closeEntry();
+        
+          model.addElement(changedFile);
+          fis.close();
+        } catch (FileNotFoundException ex) {
+          model.addElement(ex.toString());
+        }
+      }
+      
+      zar.close();
+    } catch (IOException ex) {
+      model.addElement(ex);
+      Logger.getLogger(GitSnapshot.class.getName()).log(Level.SEVERE, null, ex);
+    }
+        
     }//GEN-LAST:event_ctrlStartActionPerformed
 
     private void ctrlOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlOkActionPerformed
