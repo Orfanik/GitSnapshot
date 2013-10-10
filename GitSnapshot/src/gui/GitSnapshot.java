@@ -78,6 +78,8 @@ public class GitSnapshot extends javax.swing.JDialog {
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("res/Bundle"); // NOI18N
         jLabel1.setText(bundle.getString("Repository")); // NOI18N
 
+        ctrlRepository.setText("D:/lsyh/deskbase/cmsweb");
+
         ctrlSearchRepository.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/orange_folder_saved_search_22.png"))); // NOI18N
         ctrlSearchRepository.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -87,7 +89,12 @@ public class GitSnapshot extends javax.swing.JDialog {
 
         jLabel2.setText(bundle.getString("IssueId")); // NOI18N
 
+        ctrlIssueId.setText("DBWG-29");
+
         jLabel3.setText(bundle.getString("ZipBaseName")); // NOI18N
+
+        ctrlZipFilePrefix.setText("cmsweb");
+        ctrlZipFilePrefix.setToolTipText("");
 
         ctrlSearchOutputDir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/orange_folder_saved_search_22.png"))); // NOI18N
         ctrlSearchOutputDir.addActionListener(new java.awt.event.ActionListener() {
@@ -233,7 +240,7 @@ public class GitSnapshot extends javax.swing.JDialog {
             HashMap<String, ObjectId> sumfileList = new HashMap<>();
             int lastTimeStamp = -1;
 
-            HashMap<String, RevCommit> comments = repo.getComments("DBWG-29");
+            HashMap<String, RevCommit> comments = repo.getComments(ctrlIssueId.getText());
             it = comments.keySet().iterator();
             while (it.hasNext()) {
                 String key = (String) it.next();
@@ -259,7 +266,11 @@ public class GitSnapshot extends javax.swing.JDialog {
             for (String fname : sumfileList.keySet()) {
                 model.addElement(fname);
                 byte[] tartalom = repo.open(sumfileList.get(fname));
+                zar.putNextEntry(new ZipEntry(fname));
+                zar.write(tartalom, 0, tartalom.length);
+                zar.closeEntry();
             }
+            zar.close();
         } catch (IOException ex) {
             model.addElement(ex);
             Logger.getLogger(GitSnapshot.class.getName()).log(Level.SEVERE, null, ex);

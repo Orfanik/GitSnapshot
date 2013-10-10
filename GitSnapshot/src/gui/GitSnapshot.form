@@ -160,6 +160,9 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="ctrlRepository">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="D:/lsyh/deskbase/cmsweb"/>
+      </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="ctrlSearchRepository">
       <Properties>
@@ -179,6 +182,9 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="ctrlIssueId">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="DBWG-29"/>
+      </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel3">
       <Properties>
@@ -188,6 +194,10 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="ctrlZipFilePrefix">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="cmsweb"/>
+        <Property name="toolTipText" type="java.lang.String" value=""/>
+      </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="ctrlSearchOutputDir">
       <Properties>
