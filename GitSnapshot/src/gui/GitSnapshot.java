@@ -6,6 +6,7 @@ package gui;
 
 import git.GitRepo;
 import java.awt.Frame;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
+import javax.swing.JFileChooser;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -87,13 +89,15 @@ public class GitSnapshot extends javax.swing.JDialog {
         jScrollPane1 = new javax.swing.JScrollPane();
         ctrlMessages = new javax.swing.JList();
         jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        ctrlRepository = new javax.swing.JTextField();
+        ctrlSearchRepository = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        ctrlIssueId = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jTextField3 = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
+        ctrlZipFilePrefix = new javax.swing.JTextField();
+        ctrlSearchOutputDir = new javax.swing.JButton();
+        ctrlStart = new javax.swing.JButton();
+        ctrlOk = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         MenuRepository = new javax.swing.JMenuItem();
@@ -108,13 +112,37 @@ public class GitSnapshot extends javax.swing.JDialog {
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("res/Bundle"); // NOI18N
         jLabel1.setText(bundle.getString("Repository")); // NOI18N
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/orange_folder_saved_search_22.png"))); // NOI18N
+        ctrlSearchRepository.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/orange_folder_saved_search_22.png"))); // NOI18N
+        ctrlSearchRepository.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ctrlSearchRepositoryActionPerformed(evt);
+            }
+        });
 
         jLabel2.setText(bundle.getString("IssueId")); // NOI18N
 
         jLabel3.setText(bundle.getString("ZipBaseName")); // NOI18N
 
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/orange_folder_saved_search_22.png"))); // NOI18N
+        ctrlSearchOutputDir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/orange_folder_saved_search_22.png"))); // NOI18N
+        ctrlSearchOutputDir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ctrlSearchOutputDirActionPerformed(evt);
+            }
+        });
+
+        ctrlStart.setText(bundle.getString("StartButton")); // NOI18N
+        ctrlStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ctrlStartActionPerformed(evt);
+            }
+        });
+
+        ctrlOk.setText(bundle.getString("OkButton")); // NOI18N
+        ctrlOk.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ctrlOkActionPerformed(evt);
+            }
+        });
 
         jMenu1.setText(bundle.getString("GitPackages.jMenu1.text")); // NOI18N
 
@@ -155,14 +183,18 @@ public class GitSnapshot extends javax.swing.JDialog {
                             .addComponent(jLabel3))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jTextField1)
-                            .addComponent(jTextField2)
-                            .addComponent(jTextField3, javax.swing.GroupLayout.Alignment.LEADING))
+                            .addComponent(ctrlRepository)
+                            .addComponent(ctrlIssueId)
+                            .addComponent(ctrlZipFilePrefix, javax.swing.GroupLayout.Alignment.LEADING))
                         .addGap(10, 10, 10)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 461, Short.MAX_VALUE))
+                            .addComponent(ctrlSearchRepository, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(ctrlSearchOutputDir, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 461, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(ctrlStart)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(ctrlOk)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -172,20 +204,24 @@ public class GitSnapshot extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel1)
-                        .addComponent(jTextField1))
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addComponent(ctrlRepository))
+                    .addComponent(ctrlSearchRepository, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(ctrlIssueId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel3)
-                        .addComponent(jTextField3))
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addComponent(ctrlZipFilePrefix))
+                    .addComponent(ctrlSearchOutputDir, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 265, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(ctrlStart)
+                    .addComponent(ctrlOk))
                 .addContainerGap())
         );
 
@@ -202,6 +238,41 @@ public class GitSnapshot extends javax.swing.JDialog {
         dlg.setVisible(true);
 
     }//GEN-LAST:event_MenuRepositoryActionPerformed
+
+    private void ctrlStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlStartActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_ctrlStartActionPerformed
+
+    private void ctrlOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlOkActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+        System.exit(0);
+    }//GEN-LAST:event_ctrlOkActionPerformed
+
+    private void ctrlSearchRepositoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlSearchRepositoryActionPerformed
+        // TODO add your handling code here:
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Select repository directory");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setCurrentDirectory(new File(ctrlRepository.getText()));
+        int returnVal = chooser.showOpenDialog(this.getParent());
+        if(returnVal == JFileChooser.APPROVE_OPTION) {
+            ctrlRepository.setText(chooser.getSelectedFile().getAbsolutePath());
+        }
+    }//GEN-LAST:event_ctrlSearchRepositoryActionPerformed
+
+    private void ctrlSearchOutputDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlSearchOutputDirActionPerformed
+        // TODO add your handling code here:
+        // TODO add your handling code here:
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Select target directory");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setCurrentDirectory(new File(ctrlZipFilePrefix.getText()));
+        int returnVal = chooser.showOpenDialog(this.getParent());
+        if(returnVal == JFileChooser.APPROVE_OPTION) {
+            ctrlZipFilePrefix.setText(chooser.getSelectedFile().getAbsolutePath());
+        }
+    }//GEN-LAST:event_ctrlSearchOutputDirActionPerformed
 
     /**
      * @param args the command line arguments
@@ -248,9 +319,14 @@ public class GitSnapshot extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem MenuGit;
     private javax.swing.JMenuItem MenuRepository;
+    private javax.swing.JTextField ctrlIssueId;
     private javax.swing.JList ctrlMessages;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton ctrlOk;
+    private javax.swing.JTextField ctrlRepository;
+    private javax.swing.JButton ctrlSearchOutputDir;
+    private javax.swing.JButton ctrlSearchRepository;
+    private javax.swing.JButton ctrlStart;
+    private javax.swing.JTextField ctrlZipFilePrefix;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -258,8 +334,5 @@ public class GitSnapshot extends javax.swing.JDialog {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
     // End of variables declaration//GEN-END:variables
 }
