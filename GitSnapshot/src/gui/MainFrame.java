@@ -229,7 +229,9 @@ public class MainFrame extends javax.swing.JFrame {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Select repository directory");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setCurrentDirectory(new File((String)ctrlRepository.getSelectedItem()));
+        if (ctrlRepository.getSelectedIndex() != -1) {
+            chooser.setCurrentDirectory(new File((String)ctrlRepository.getSelectedItem()));
+        }
         int returnVal = chooser.showOpenDialog(this.getParent());
         if(returnVal == JFileChooser.APPROVE_OPTION) {
             ctrlRepository.addItem(chooser.getSelectedFile().getAbsolutePath());
@@ -263,21 +265,20 @@ public class MainFrame extends javax.swing.JFrame {
 
         try {
             try {
-                Repo repo = new Repo();
-                repo.setNeve(wrkDir);
-                repo.setIssueId(ctrlIssueId.getText());
-                repo.setZipPrefix(ctrlZipFilePrefix.getText());
-                int nr = repo.insert();
-                if (nr == 0) {
-                    nr = repo.update();
-                    if (nr > 0) {
-                        model.addElement("updated:");
-                    } else {
-                        model.addElement("hiba");
-                    }
+                ResultSet rs = Repo.fetchByNeve(wrkDir);
+                Repo adat = null;
+                if (rs.next()) {
+                    adat = new Repo(rs);
+                    adat.setIssueId(ctrlIssueId.getText());
+                    adat.setZipPrefix(ctrlZipFilePrefix.getText());
+                    int nr = 0;
+                    nr = adat.update();
                 } else {
-                    model.addElement("inserted:");
-                    model.addElement(new Integer(repo.getId()).toString());
+                    adat = new Repo(-1, wrkDir);
+                    adat.setIssueId(ctrlIssueId.getText());
+                    adat.setZipPrefix(ctrlZipFilePrefix.getText());
+                    int nr = 0;
+                    nr = adat.insert();
                 }
             } catch (SQLException ex) {
                 model.addElement(ex);

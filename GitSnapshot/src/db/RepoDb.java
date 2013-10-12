@@ -4,9 +4,12 @@
  */
 package db;
 
+import gui.MainFrame;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import model.Adat;
 
 /**
@@ -77,7 +80,7 @@ public class RepoDb extends Adat {
       stmSelect1 = Database.getDb().prepareStatement("select id, neve, zipprefix, issueid from repository where id = ?");
       stmSelect2 = Database.getDb().prepareStatement("select id, neve, zipprefix, issueid from repository where neve = ?");
       stmSelectAll = Database.getDb().prepareStatement("select id, neve, zipprefix, issueid from repository order by neve");
-      stmInsert = Database.getDb().prepareStatement("update repository set neve = ?, zipprefix = ?, issueid = ? where id = ?");
+      stmInsert = Database.getDb().prepareStatement("insert into repository (neve, zipprefix, issueid) values (?, ?, ?)");
       stmUpdate = Database.getDb().prepareStatement("update repository set neve = ?, zipprefix = ?, issueid = ? where id = ?");
     }
   }
@@ -119,6 +122,8 @@ public class RepoDb extends Adat {
     stmUpdate.setString(2, this.zipPrefix);
     stmUpdate.setString(3, this.issueId);
     stmUpdate.setInt(4, this.getId());
+    Logger.getLogger(RepoDb.class.getName()).log(Level.SEVERE, null, stmUpdate.toString());
+    
     return (stmUpdate.executeUpdate());
   }
   
@@ -134,10 +139,13 @@ public class RepoDb extends Adat {
     stmInsert.setString(2, this.zipPrefix);
     stmInsert.setString(3, this.issueId);
     int rv = stmInsert.executeUpdate(); 
+    Logger.getLogger(RepoDb.class.getName()).log(Level.SEVERE, null, stmInsert.toString());
     if (rv > 0)
     {
         ResultSet rs = stmInsert.getGeneratedKeys();
-        this.setId(rs.getInt(1));
+        if (rs.next()) {
+            this.setId(rs.getInt(1));
+        }
     }
     return (rv);
   }
