@@ -4,11 +4,18 @@
  */
 package db;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
+
 
 /**
  *
@@ -29,6 +36,16 @@ public class Database {
       java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("res/Bundle"); // NOI18N
       String dbName = bundle.getString("database");
       try {
+        File dbFile = new File(dbName);
+        if (!dbFile.exists()) {
+          URL inputUrl = Connection.class.getResource("/res/GitSnapshot.db");
+          File dest = new File(dbName);
+            try {            
+                FileUtils.copyURLToFile(inputUrl, dest);
+            } catch (IOException ex) {
+                Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         db = DriverManager.getConnection("jdbc:sqlite:" + dbName);
         /// memory db: "jdbc:sqlite::memory:"
       } catch (SQLException e) {
