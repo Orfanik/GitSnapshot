@@ -153,9 +153,6 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="ctrlIssueId">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="DBWG-29"/>
-      </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel3">
       <Properties>
@@ -166,7 +163,6 @@
     </Component>
     <Component class="javax.swing.JTextField" name="ctrlZipFilePrefix">
       <Properties>
-        <Property name="text" type="java.lang.String" value="cmsweb"/>
         <Property name="toolTipText" type="java.lang.String" value=""/>
       </Properties>
     </Component>
@@ -204,9 +200,7 @@
       <Properties>
         <Property name="editable" type="boolean" value="true"/>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-          <StringArray count="1">
-            <StringItem index="0" value="d:\lsyh\deskbase\cmsweb\"/>
-          </StringArray>
+          <StringArray count="0"/>
         </Property>
       </Properties>
       <Events>
