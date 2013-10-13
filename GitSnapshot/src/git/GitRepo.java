@@ -31,11 +31,13 @@ import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.ObjectStream;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
@@ -63,12 +65,12 @@ public class GitRepo {
       return loader.getCachedBytes();
   }
   
-  public ArrayList getBranches() {
-    ArrayList<String> branches = new ArrayList<>();
+  public HashMap<ObjectId, String> getBranches() {
+    HashMap<ObjectId, String> branches = new HashMap<>();
     try {
         List<Ref> call = new Git(repository).branchList().call();
         for(Ref ref : call) {
-            branches.add(ref.getName() + " : " + ref.getObjectId().getName());
+            branches.put(ref.getObjectId(), ref.getName());
         }
     } catch (GitAPIException ex) {
         Logger.getLogger(GitRepo.class.getName()).log(Level.SEVERE, null, ex);
@@ -76,12 +78,15 @@ public class GitRepo {
     return branches;
   }
   
-  public HashMap getComments(String filterText) throws IOException {
+  public HashMap getComments(String filterText, String branchName) throws IOException {
     HashMap<String, RevCommit> comments = new HashMap<>();
     
     try {
         Git git = new Git(repository);
-        Iterable<RevCommit> commits = git.log().all().call();
+        ObjectId to = repository.resolve(branchName);
+
+        Iterable<RevCommit> commits = null;
+        commits = git.log().add(to).call();
         for (RevCommit commit : commits) {
             boolean filterOk = true;
             if (!filterText.isEmpty()) {

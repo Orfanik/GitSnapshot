@@ -58,15 +58,29 @@ public class MainFrame extends javax.swing.JFrame {
     private void Init() {
       ctrlRepository.removeAllItems();
       try {
-          ResultSet rs = Repo.fetchAll();
-          DefaultComboBoxModel model = (DefaultComboBoxModel)(ctrlRepository.getModel());
+        ResultSet rs = Repo.fetchAll();
+        String wrkDir = new String();
+        DefaultComboBoxModel model = (DefaultComboBoxModel)(ctrlRepository.getModel());
         while (rs.next()) {
           Repo adat = new Repo(rs);
           model.addElement(adat.getNeve());
+          if (wrkDir.isEmpty()) {
+             wrkDir = adat.getNeve();
+          }
+        }
+        model = (DefaultComboBoxModel)(ctrlBranch.getModel());
+        model.removeAllElements();
+        GitRepo repo = new GitRepo(wrkDir);
+        HashMap<ObjectId, String> branches = repo.getBranches();
+        Iterator it = branches.values().iterator();
+        while (it.hasNext()) {
+          model.addElement(it.next());
         }
       } catch (SQLException ex) {
           Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-      }
+      } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     
@@ -91,6 +105,8 @@ public class MainFrame extends javax.swing.JFrame {
         ctrlStart = new javax.swing.JButton();
         ctrlOk = new javax.swing.JButton();
         ctrlRepository = new javax.swing.JComboBox();
+        jLabel4 = new javax.swing.JLabel();
+        ctrlBranch = new javax.swing.JComboBox();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenuAbout = new javax.swing.JMenu();
 
@@ -144,6 +160,10 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        jLabel4.setText(bundle.getString("lblBranch")); // NOI18N
+
+        ctrlBranch.setModel(new DefaultComboBoxModel());
+
         jMenuAbout.setText(bundle.getString("GitPackages.jMenu2.text")); // NOI18N
         jMenuAbout.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -161,25 +181,32 @@ public class MainFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel3))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(ctrlIssueId)
-                            .addComponent(ctrlZipFilePrefix, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(ctrlRepository, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(10, 10, 10)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(ctrlSearchRepository, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(ctrlSearchOutputDir, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(ctrlStart)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(ctrlOk)))
+                        .addComponent(ctrlOk))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(ctrlIssueId)
+                                .addGap(70, 70, 70))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(ctrlZipFilePrefix, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(ctrlRepository, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(ctrlBranch, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(10, 10, 10)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(ctrlSearchRepository, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(ctrlSearchOutputDir, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(26, 26, 26)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -192,17 +219,21 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(ctrlRepository, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(ctrlSearchRepository, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel4)
+                    .addComponent(ctrlBranch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(ctrlIssueId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(ctrlIssueId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel3)
-                        .addComponent(ctrlZipFilePrefix))
-                    .addComponent(ctrlSearchOutputDir, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addComponent(ctrlZipFilePrefix, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel3))
+                    .addComponent(ctrlSearchOutputDir, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(ctrlStart)
@@ -280,12 +311,6 @@ public class MainFrame extends javax.swing.JFrame {
                 model.addElement(ex);
             }
             GitRepo repo = new GitRepo(wrkDir);
-            ArrayList<String> branches = repo.getBranches();
-            Iterator it = branches.iterator();
-            model.addElement("Branches:");
-            while (it.hasNext()) {
-                model.addElement(it.next());
-            }
 
             model.addElement(" ");
             model.addElement("Comments");
@@ -293,8 +318,9 @@ public class MainFrame extends javax.swing.JFrame {
             HashMap<String, ObjectId> sumfileList = new HashMap<>();
             int lastTimeStamp = -1;
 
-            HashMap<String, RevCommit> comments = repo.getComments(ctrlIssueId.getText());
-            it = comments.keySet().iterator();
+            String branch = (String)ctrlBranch.getSelectedItem();
+            HashMap<String, RevCommit> comments = repo.getComments(ctrlIssueId.getText(), branch);
+            Iterator it = comments.keySet().iterator();
             while (it.hasNext()) {
                 String key = (String) it.next();
                 RevCommit commit = comments.get(key);
@@ -340,14 +366,27 @@ public class MainFrame extends javax.swing.JFrame {
       DefaultListModel model = (DefaultListModel) ctrlMessages.getModel();
       try {
         ResultSet rs = Repo.fetchByNeve((String)ctrlRepository.getSelectedItem());
+        String wrkDir = new String();
         while (rs.next()) {
             Repo adat = new Repo(rs);
             ctrlIssueId.setText(adat.getIssueId());
             ctrlZipFilePrefix.setText(adat.getZipPrefix());
+            wrkDir = adat.getNeve();
         }
+        DefaultComboBoxModel cmodel = (DefaultComboBoxModel)(ctrlBranch.getModel());
+        cmodel.removeAllElements();
+        GitRepo repo = new GitRepo(wrkDir);
+        HashMap<ObjectId, String> branches = repo.getBranches();
+        Iterator it = branches.values().iterator();
+        while (it.hasNext()) {
+          cmodel.addElement(it.next());
+        }
+        
       } catch (SQLException ex) {
         Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-      }
+      } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_ctrlRepositoryActionPerformed
 
     /**
@@ -385,6 +424,7 @@ public class MainFrame extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox ctrlBranch;
     private javax.swing.JTextField ctrlIssueId;
     private javax.swing.JList ctrlMessages;
     private javax.swing.JButton ctrlOk;
@@ -396,6 +436,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JMenu jMenuAbout;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
