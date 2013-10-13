@@ -20,6 +20,7 @@ public class RepoDb extends Adat {
 
     private String zipPrefix = "";
     private String issueId = "";
+    private String branch = "";
     static PreparedStatement stmSelect1 = null;
     static PreparedStatement stmSelect2 = null;
     static PreparedStatement stmSelectAll = null;
@@ -38,6 +39,7 @@ public class RepoDb extends Adat {
         setNeve(rs.getString("neve"));
         this.zipPrefix = rs.getString("zipprefix");
         this.issueId = rs.getString("issueid");
+        this.branch = rs.getString("branch");
     }
     /**
      * Get the value of zipPrefix
@@ -75,13 +77,31 @@ public class RepoDb extends Adat {
         this.issueId = issueId;
     }
 
+    /**
+     *
+     * @return
+     */
+    public String getBranch() {
+        return branch;
+    }
+
+    /**
+     *
+     * @param branch
+     */
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
+
+    
+    
   private static void Init() throws SQLException {
     if (stmSelect1 == null) {
-      stmSelect1 = Database.getDb().prepareStatement("select id, neve, zipprefix, issueid from repository where id = ?");
-      stmSelect2 = Database.getDb().prepareStatement("select id, neve, zipprefix, issueid from repository where neve = ?");
-      stmSelectAll = Database.getDb().prepareStatement("select id, neve, zipprefix, issueid from repository order by neve");
-      stmInsert = Database.getDb().prepareStatement("insert into repository (neve, zipprefix, issueid) values (?, ?, ?)");
-      stmUpdate = Database.getDb().prepareStatement("update repository set neve = ?, zipprefix = ?, issueid = ? where id = ?");
+      stmSelect1 = Database.getDb().prepareStatement("select id, neve, zipprefix, issueid, branch from repository where id = ?");
+      stmSelect2 = Database.getDb().prepareStatement("select id, neve, zipprefix, issueid, branch from repository where neve = ?");
+      stmSelectAll = Database.getDb().prepareStatement("select id, neve, zipprefix, issueid, branch from repository order by neve");
+      stmInsert = Database.getDb().prepareStatement("insert into repository (neve, zipprefix, issueid, branch) values (?, ?, ?, ?)");
+      stmUpdate = Database.getDb().prepareStatement("update repository set neve = ?, zipprefix = ?, issueid = ?, branch = ? where id = ?");
     }
   }
     
@@ -121,8 +141,8 @@ public class RepoDb extends Adat {
     stmUpdate.setString(1, this.getNeve());
     stmUpdate.setString(2, this.zipPrefix);
     stmUpdate.setString(3, this.issueId);
-    stmUpdate.setInt(4, this.getId());
-    Logger.getLogger(RepoDb.class.getName()).log(Level.SEVERE, null, stmUpdate.toString());
+    stmUpdate.setString(4, this.branch);
+    stmUpdate.setInt(5, this.getId());
     
     return (stmUpdate.executeUpdate());
   }
@@ -138,8 +158,8 @@ public class RepoDb extends Adat {
     stmInsert.setString(1, this.getNeve());
     stmInsert.setString(2, this.zipPrefix);
     stmInsert.setString(3, this.issueId);
+    stmInsert.setString(4, this.branch);
     int rv = stmInsert.executeUpdate(); 
-    Logger.getLogger(RepoDb.class.getName()).log(Level.SEVERE, null, stmInsert.toString());
     if (rv > 0)
     {
         ResultSet rs = stmInsert.getGeneratedKeys();

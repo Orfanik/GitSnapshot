@@ -298,12 +298,14 @@ public class MainFrame extends javax.swing.JFrame {
                     adat = new Repo(rs);
                     adat.setIssueId(ctrlIssueId.getText());
                     adat.setZipPrefix(ctrlZipFilePrefix.getText());
+                    adat.setBranch((String)ctrlBranch.getSelectedItem());
                     int nr = 0;
                     nr = adat.update();
                 } else {
                     adat = new Repo(-1, wrkDir);
                     adat.setIssueId(ctrlIssueId.getText());
                     adat.setZipPrefix(ctrlZipFilePrefix.getText());
+                    adat.setBranch((String)ctrlBranch.getSelectedItem());
                     int nr = 0;
                     nr = adat.insert();
                 }
@@ -365,13 +367,14 @@ public class MainFrame extends javax.swing.JFrame {
       // TODO add your handling code here:
       DefaultListModel model = (DefaultListModel) ctrlMessages.getModel();
       try {
-        ResultSet rs = Repo.fetchByNeve((String)ctrlRepository.getSelectedItem());
-        String wrkDir = new String();
+        String wrkDir = (String)ctrlRepository.getSelectedItem();
+        ResultSet rs = Repo.fetchByNeve(wrkDir);
+        String branch = new String();
         while (rs.next()) {
             Repo adat = new Repo(rs);
             ctrlIssueId.setText(adat.getIssueId());
             ctrlZipFilePrefix.setText(adat.getZipPrefix());
-            wrkDir = adat.getNeve();
+            branch = adat.getBranch();
         }
         DefaultComboBoxModel cmodel = (DefaultComboBoxModel)(ctrlBranch.getModel());
         cmodel.removeAllElements();
@@ -379,7 +382,11 @@ public class MainFrame extends javax.swing.JFrame {
         HashMap<ObjectId, String> branches = repo.getBranches();
         Iterator it = branches.values().iterator();
         while (it.hasNext()) {
-          cmodel.addElement(it.next());
+          String br = (String)it.next();
+          cmodel.addElement(br);
+        }
+        if (branch != null && !branch.isEmpty()) {
+            cmodel.setSelectedItem(branch);
         }
         
       } catch (SQLException ex) {
