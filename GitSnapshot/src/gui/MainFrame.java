@@ -17,8 +17,10 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -52,10 +54,9 @@ public class MainFrame extends javax.swing.JFrame {
             model.addElement(ex);
         }
         
-        Init();
     }
 
-    private void Init() {
+    public void Init() {
       ctrlRepository.removeAllItems();
       try {
         ResultSet rs = Repo.fetchAll();
@@ -68,19 +69,9 @@ public class MainFrame extends javax.swing.JFrame {
              wrkDir = adat.getNeve();
           }
         }
-        model = (DefaultComboBoxModel)(ctrlBranch.getModel());
-        model.removeAllElements();
-        GitRepo repo = new GitRepo(wrkDir);
-        HashMap<ObjectId, String> branches = repo.getBranches();
-        Iterator it = branches.values().iterator();
-        while (it.hasNext()) {
-          model.addElement(it.next());
-        }
       } catch (SQLException ex) {
-          Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-      } catch (IOException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+      }
     }
     
     
@@ -252,14 +243,13 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuAboutActionPerformed
 
     private void ctrlSearchRepositoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlSearchRepositoryActionPerformed
-        // TODO add your handling code here:
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Select repository directory");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         if (ctrlRepository.getSelectedIndex() != -1) {
             chooser.setCurrentDirectory(new File((String)ctrlRepository.getSelectedItem()));
         }
-        int returnVal = chooser.showOpenDialog(this.getParent());
+        int returnVal = chooser.showOpenDialog(this);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
             ctrlRepository.addItem(chooser.getSelectedFile().getAbsolutePath());
             ctrlRepository.setSelectedIndex(ctrlRepository.getItemCount()-1);
@@ -267,20 +257,24 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_ctrlSearchRepositoryActionPerformed
 
     private void ctrlSearchOutputDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlSearchOutputDirActionPerformed
-        // TODO add your handling code here:
-        // TODO add your handling code here:
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Select target directory");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setCurrentDirectory(new File(ctrlZipFilePrefix.getText()));
-        int returnVal = chooser.showOpenDialog(this.getParent());
+        File currDir = new File(ctrlZipFilePrefix.getText());
+        
+        /// maybe its not a valid file, so we need to get the alid part.
+        if (!currDir.exists()) {
+          currDir = new File(currDir.getParent());
+        }
+        
+        chooser.setCurrentDirectory(currDir);
+        int returnVal = chooser.showOpenDialog(this);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
             ctrlZipFilePrefix.setText(chooser.getSelectedFile().getAbsolutePath());
         }
     }//GEN-LAST:event_ctrlSearchOutputDirActionPerformed
 
     private void ctrlStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlStartActionPerformed
-        // TODO add your handling code here:
         ArrayList<String> commits = new ArrayList<>();
         ArrayList<String> files = new ArrayList<>();
         String wrkDir = (String)(ctrlRepository.getSelectedItem());
@@ -314,7 +308,6 @@ public class MainFrame extends javax.swing.JFrame {
             }
             GitRepo repo = new GitRepo(wrkDir);
 
-            model.addElement(" ");
             model.addElement("Comments");
             ZipOutputStream zar = new ZipOutputStream(new FileOutputStream(outZipname));
             HashMap<String, ObjectId> sumfileList = new HashMap<>();
@@ -327,10 +320,10 @@ public class MainFrame extends javax.swing.JFrame {
                 String key = (String) it.next();
                 RevCommit commit = comments.get(key);
                 model.addElement(" ");
-                model.addElement(key);
+                Date commitdate = new Date(commit.getCommitTime()*1000L);
+                DateFormat df = DateFormat.getDateTimeInstance();
+                model.addElement(df.format(commitdate));
                 model.addElement(commit.getFullMessage());
-                model.addElement(commit.getCommitTime());
-                model.addElement("Files:");
 
                 HashMap<ObjectId, String> fileList = repo.getFilelistForComment(commit);
                 for (ObjectId fname : fileList.keySet()) {
@@ -342,8 +335,11 @@ public class MainFrame extends javax.swing.JFrame {
                         }
                     }
                 }
-                lastTimeStamp = commit.getCommitTime();
+                if (lastTimeStamp < commit.getCommitTime()) {
+                  lastTimeStamp = commit.getCommitTime();
+                }
             }
+            model.addElement("Files:");
             for (String fname : sumfileList.keySet()) {
                 model.addElement(fname);
                 byte[] tartalom = repo.open(sumfileList.get(fname));
@@ -392,8 +388,8 @@ public class MainFrame extends javax.swing.JFrame {
       } catch (SQLException ex) {
         Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
       } catch (IOException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+      }
     }//GEN-LAST:event_ctrlRepositoryActionPerformed
 
     /**
@@ -426,7 +422,9 @@ public class MainFrame extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new MainFrame().setVisible(true);
+                MainFrame frame = new MainFrame();
+                frame.setVisible(true);
+                frame.Init();
             }
         });
     }

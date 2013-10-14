@@ -78,6 +78,23 @@ public class GitRepo {
     return branches;
   }
   
+    /**
+     *
+     * @param branchName
+     * @return
+     * @throws IOException
+     */
+    public Ref getLocalBranch(String branchName) throws IOException
+  {
+    Ref ref2check = repository.getRef(branchName);
+    Ref local = null;
+    if (ref2check != null && ref2check.getName().startsWith(Constants.R_HEADS))
+    {
+      local = ref2check;
+    }
+      return local;
+  }
+
   public HashMap getComments(String filterText, String branchName) throws IOException {
     HashMap<String, RevCommit> comments = new HashMap<>();
     

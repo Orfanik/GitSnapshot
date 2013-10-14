@@ -34,11 +34,12 @@ public class Database {
     {
       // create a database db
       java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("res/Bundle"); // NOI18N
-      String dbName = bundle.getString("database");
+      String dbName = System.getProperty("user.home") + File.separator + bundle.getString("database");
       try {
         File dbFile = new File(dbName);
         if (!dbFile.exists()) {
           URL inputUrl = Connection.class.getResource("/res/GitSnapshot.db");
+          
           File dest = new File(dbName);
             try {            
                 FileUtils.copyURLToFile(inputUrl, dest);
