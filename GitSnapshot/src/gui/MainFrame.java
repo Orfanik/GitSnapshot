@@ -47,11 +47,11 @@ public class MainFrame extends javax.swing.JFrame {
     public MainFrame() {
         initComponents();
         
-        DefaultListModel model = (DefaultListModel)(ctrlMessages.getModel());
+        DefaultListModel<String> model = (DefaultListModel<String>)(ctrlMessages.getModel());
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException ex) {
-            model.addElement(ex);
+            model.addElement(ex.toString());
         }
         
     }
@@ -61,7 +61,7 @@ public class MainFrame extends javax.swing.JFrame {
       try {
         ResultSet rs = Repo.fetchAll();
         String wrkDir = new String();
-        DefaultComboBoxModel model = (DefaultComboBoxModel)(ctrlRepository.getModel());
+        DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>)(ctrlRepository.getModel());
         while (rs.next()) {
           Repo adat = new Repo(rs);
           model.addElement(adat.getNeve());
@@ -99,13 +99,14 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         ctrlBranch = new javax.swing.JComboBox();
         jMenuBar1 = new javax.swing.JMenuBar();
-        jMenuAbout = new javax.swing.JMenu();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuAbout = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("res/Bundle"); // NOI18N
         setTitle(bundle.getString("MainTitle")); // NOI18N
 
-        ctrlMessages.setModel(new DefaultListModel());
+        ctrlMessages.setModel(new DefaultListModel<String>());
         jScrollPane1.setViewportView(ctrlMessages);
 
         jLabel1.setText(bundle.getString("Repository")); // NOI18N
@@ -145,6 +146,7 @@ public class MainFrame extends javax.swing.JFrame {
         });
 
         ctrlRepository.setEditable(true);
+        ctrlRepository.setModel(new DefaultComboBoxModel<String>());
         ctrlRepository.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ctrlRepositoryActionPerformed(evt);
@@ -153,15 +155,19 @@ public class MainFrame extends javax.swing.JFrame {
 
         jLabel4.setText(bundle.getString("lblBranch")); // NOI18N
 
-        ctrlBranch.setModel(new DefaultComboBoxModel());
+        ctrlBranch.setModel(new DefaultComboBoxModel<String>());
 
-        jMenuAbout.setText(bundle.getString("GitPackages.jMenu2.text")); // NOI18N
+        jMenu1.setText(bundle.getString("GitPackages.jMenu2.text")); // NOI18N
+
+        jMenuAbout.setText(bundle.getString("AboutMenu")); // NOI18N
         jMenuAbout.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuAboutActionPerformed(evt);
             }
         });
-        jMenuBar1.add(jMenuAbout);
+        jMenu1.add(jMenuAbout);
+
+        jMenuBar1.add(jMenu1);
 
         setJMenuBar(jMenuBar1);
 
@@ -235,13 +241,6 @@ public class MainFrame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jMenuAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuAboutActionPerformed
-        // TODO add your handling code here:
-        DefaultListModel model = (DefaultListModel) ctrlMessages.getModel();
-        model.addElement("jMenuAboutActionPerformed");
-        model.addElement("");
-    }//GEN-LAST:event_jMenuAboutActionPerformed
-
     private void ctrlSearchRepositoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlSearchRepositoryActionPerformed
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Select repository directory");
@@ -280,7 +279,7 @@ public class MainFrame extends javax.swing.JFrame {
         String wrkDir = (String)(ctrlRepository.getSelectedItem());
         String outZipPath = wrkDir;
         String outZipname = ctrlZipFilePrefix.getText()+"-"+ctrlIssueId.getText()+".zip";
-        DefaultListModel model = (DefaultListModel)(ctrlMessages.getModel());
+        DefaultListModel<String> model = (DefaultListModel<String>)(ctrlMessages.getModel());
         model.addElement(outZipname);
         model.addElement("");
 
@@ -304,7 +303,7 @@ public class MainFrame extends javax.swing.JFrame {
                     nr = adat.insert();
                 }
             } catch (SQLException ex) {
-                model.addElement(ex);
+                model.addElement(ex.toString());
             }
             GitRepo repo = new GitRepo(wrkDir);
 
@@ -361,7 +360,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void ctrlRepositoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlRepositoryActionPerformed
       // TODO add your handling code here:
-      DefaultListModel model = (DefaultListModel) ctrlMessages.getModel();
+      DefaultListModel<String> model = (DefaultListModel<String>) ctrlMessages.getModel();
       try {
         String wrkDir = (String)ctrlRepository.getSelectedItem();
         ResultSet rs = Repo.fetchByNeve(wrkDir);
@@ -372,7 +371,7 @@ public class MainFrame extends javax.swing.JFrame {
             ctrlZipFilePrefix.setText(adat.getZipPrefix());
             branch = adat.getBranch();
         }
-        DefaultComboBoxModel cmodel = (DefaultComboBoxModel)(ctrlBranch.getModel());
+        DefaultComboBoxModel<String> cmodel = (DefaultComboBoxModel<String>)(ctrlBranch.getModel());
         cmodel.removeAllElements();
         GitRepo repo = new GitRepo(wrkDir);
         HashMap<ObjectId, String> branches = repo.getBranches();
@@ -391,6 +390,12 @@ public class MainFrame extends javax.swing.JFrame {
         Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
       }
     }//GEN-LAST:event_ctrlRepositoryActionPerformed
+
+    private void jMenuAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuAboutActionPerformed
+        // TODO add your handling code here:
+        AboutDialog dlg = new AboutDialog(this, true);
+        dlg.setVisible(true);
+    }//GEN-LAST:event_jMenuAboutActionPerformed
 
     /**
      * @param args the command line arguments
@@ -442,7 +447,8 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JMenu jMenuAbout;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenuItem jMenuAbout;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
