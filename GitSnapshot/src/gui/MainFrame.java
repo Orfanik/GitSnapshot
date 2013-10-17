@@ -31,6 +31,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import model.Repo;
+import model.RepoEntry;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -306,10 +307,13 @@ public class MainFrame extends javax.swing.JFrame {
                 model.addElement(ex.toString());
             }
             GitRepo repo = new GitRepo(wrkDir);
+            if (repo.getRepository().isBare()) {
+                model.addElement("git repo is bare.");
+            }
 
             model.addElement("Comments");
             ZipOutputStream zar = new ZipOutputStream(new FileOutputStream(outZipname));
-            HashMap<String, ObjectId> sumfileList = new HashMap<>();
+            HashMap<String, RepoEntry> sumfileList = new HashMap<>();
             int lastTimeStamp = -1;
 
             String branch = (String)ctrlBranch.getSelectedItem();
@@ -323,14 +327,38 @@ public class MainFrame extends javax.swing.JFrame {
                 DateFormat df = DateFormat.getDateTimeInstance();
                 model.addElement(df.format(commitdate));
                 model.addElement(commit.getFullMessage());
+                String zipdirpref = new Integer(commit.getCommitTime()).toString();
 
                 HashMap<ObjectId, String> fileList = repo.getFilelistForComment(commit);
                 for (ObjectId fname : fileList.keySet()) {
+                    //byte[] tartalom = repo.open(fname);
+                    // zar.putNextEntry(new ZipEntry(zipdirpref+File.separator+fileList.get(fname)));
+                    //zar.write(tartalom, 0, tartalom.length);
+                    //zar.closeEntry();
                     if (lastTimeStamp < commit.getCommitTime()) {
-                        sumfileList.put(fileList.get(fname), fname);
+                        //model.addElement("*"+zipdirpref+File.separator+fileList.get(fname));
+                        RepoEntry entry = new RepoEntry(fileList.get(fname), 
+                                fname, 
+                                commit.getCommitTime());
+                        sumfileList.put(fileList.get(fname), entry);
                     } else {
                         if (!sumfileList.containsKey(fileList.get(fname))) {
-                            sumfileList.put(fileList.get(fname), fname);
+                            //model.addElement("+"+zipdirpref+File.separator+fileList.get(fname));
+                            RepoEntry entry = new RepoEntry(fileList.get(fname), 
+                                    fname, 
+                                    commit.getCommitTime());
+                            sumfileList.put(fileList.get(fname), entry);
+                        } else {
+                          RepoEntry entry = sumfileList.get(fileList.get(fname));
+                          if (entry.getCommitTime() < commit.getCommitTime()) {
+                            entry = new RepoEntry(fileList.get(fname), 
+                                    fname, 
+                                    commit.getCommitTime());
+                            sumfileList.put(fileList.get(fname), entry);
+                            //model.addElement("*"+zipdirpref+File.separator+fileList.get(fname));
+//                          } else {
+//                            model.addElement("-"+zipdirpref+File.separator+fileList.get(fname));
+                          }
                         }
                     }
                 }
@@ -341,7 +369,7 @@ public class MainFrame extends javax.swing.JFrame {
             model.addElement("Files:");
             for (String fname : sumfileList.keySet()) {
                 model.addElement(fname);
-                byte[] tartalom = repo.open(sumfileList.get(fname));
+                byte[] tartalom = repo.open(sumfileList.get(fname).getObjectId());
                 zar.putNextEntry(new ZipEntry(fname));
                 zar.write(tartalom, 0, tartalom.length);
                 zar.closeEntry();
@@ -349,6 +377,7 @@ public class MainFrame extends javax.swing.JFrame {
             zar.close();
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            model.addElement(ex.toString());
         }
     }//GEN-LAST:event_ctrlStartActionPerformed
 

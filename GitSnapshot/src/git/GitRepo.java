@@ -49,6 +49,14 @@ public class GitRepo {
   String     repoUrl    = null;
   Repository repository = null;
 
+    /**
+     *
+     * @return
+     */
+    public Repository getRepository() {
+        return repository;
+    }
+
   public GitRepo(String repoName) throws IOException {
     FileRepositoryBuilder builder = new FileRepositoryBuilder();
     repository = builder.setGitDir(new File(repoName+"/.git")).readEnvironment()    // scan environment GIT_* variables
