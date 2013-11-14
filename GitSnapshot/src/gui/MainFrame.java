@@ -35,6 +35,7 @@ import model.RepoEntry;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.treewalk.TreeWalk;
 
 /**
  *
@@ -99,6 +100,8 @@ public class MainFrame extends javax.swing.JFrame {
         ctrlRepository = new javax.swing.JComboBox();
         jLabel4 = new javax.swing.JLabel();
         ctrlBranch = new javax.swing.JComboBox();
+        jLabel5 = new javax.swing.JLabel();
+        ctrlFullVersion = new javax.swing.JCheckBox();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuAbout = new javax.swing.JMenuItem();
@@ -158,6 +161,8 @@ public class MainFrame extends javax.swing.JFrame {
 
         ctrlBranch.setModel(new DefaultComboBoxModel<String>());
 
+        jLabel5.setText("Full version:");
+
         jMenu1.setText(bundle.getString("GitPackages.jMenu2.text")); // NOI18N
 
         jMenuAbout.setText(bundle.getString("AboutMenu")); // NOI18N
@@ -204,7 +209,12 @@ public class MainFrame extends javax.swing.JFrame {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(ctrlSearchRepository, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(ctrlSearchOutputDir, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(26, 26, 26)))))
+                                .addGap(26, 26, 26))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(ctrlFullVersion)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -231,7 +241,11 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(jLabel3))
                     .addComponent(ctrlSearchOutputDir, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(ctrlFullVersion))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(ctrlStart)
@@ -280,6 +294,7 @@ public class MainFrame extends javax.swing.JFrame {
         String wrkDir = (String)(ctrlRepository.getSelectedItem());
         String outZipPath = wrkDir;
         String outZipname = ctrlZipFilePrefix.getText()+"-"+ctrlIssueId.getText()+".zip";
+        String outFullZipname = ctrlZipFilePrefix.getText()+".zip";
         DefaultListModel<String> model = (DefaultListModel<String>)(ctrlMessages.getModel());
         model.addElement(outZipname);
         model.addElement("");
@@ -313,9 +328,15 @@ public class MainFrame extends javax.swing.JFrame {
 
             model.addElement("Comments");
             ZipOutputStream zar = new ZipOutputStream(new FileOutputStream(outZipname));
+            ZipOutputStream zarFull = null;
+            if (ctrlFullVersion.isSelected()) {
+                zarFull = new ZipOutputStream(new FileOutputStream(outFullZipname));
+            }
+            
             HashMap<String, RepoEntry> sumfileList = new HashMap<>();
             int lastTimeStamp = -1;
 
+            RevCommit lastCommit = null;
             String branch = (String)ctrlBranch.getSelectedItem();
             HashMap<String, RevCommit> comments = repo.getComments(ctrlIssueId.getText(), branch);
             Iterator it = comments.keySet().iterator();
@@ -362,8 +383,14 @@ public class MainFrame extends javax.swing.JFrame {
                         }
                     }
                 }
-                if (lastTimeStamp < commit.getCommitTime()) {
-                  lastTimeStamp = commit.getCommitTime();
+                if (lastCommit == null) {
+                    lastTimeStamp = commit.getCommitTime();
+                    lastCommit = commit;
+                } else {
+                    if (commit.getCommitTime() > lastCommit.getCommitTime()) {
+                        lastCommit = commit;
+                        lastTimeStamp = commit.getCommitTime();
+                    }
                 }
             }
             model.addElement("Files:");
@@ -375,6 +402,29 @@ public class MainFrame extends javax.swing.JFrame {
                 zar.closeEntry();
             }
             zar.close();
+            if (zarFull != null) {
+                TreeWalk treeWalk = new TreeWalk(repo.getRepository());
+                treeWalk.addTree(lastCommit.getTree());
+                treeWalk.setRecursive(true);
+                model.addElement("Full version Files:");
+
+                while(treeWalk.next()){
+                    if (!treeWalk.getPathString().contains(".gitignore")) {
+                        model.addElement(treeWalk.getPathString());
+                        
+                        ObjectId objId = treeWalk.getObjectId(0);
+                        if (objId == null) {
+                            model.addElement("not resolved");
+                        } else {
+                            byte[] tartalom = repo.open(objId);
+                            zarFull.putNextEntry(new ZipEntry(treeWalk.getPathString()));
+                            zarFull.write(tartalom, 0, tartalom.length);
+                            zarFull.closeEntry();
+                        }
+                    }
+                }  
+                zarFull.close();
+            }
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
             model.addElement(ex.toString());
@@ -464,6 +514,7 @@ public class MainFrame extends javax.swing.JFrame {
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox ctrlBranch;
+    private javax.swing.JCheckBox ctrlFullVersion;
     private javax.swing.JTextField ctrlIssueId;
     private javax.swing.JList ctrlMessages;
     private javax.swing.JButton ctrlOk;
@@ -476,6 +527,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuItem jMenuAbout;
     private javax.swing.JMenuBar jMenuBar1;
