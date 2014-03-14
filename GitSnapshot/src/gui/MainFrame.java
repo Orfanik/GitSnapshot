@@ -4,22 +4,14 @@
  */
 package gui;
 
-import db.Database;
 import git.GitRepo;
-import java.awt.Frame;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,10 +22,12 @@ import java.util.zip.ZipOutputStream;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 import model.Repo;
 import model.RepoEntry;
+import model.action.MakeGitSnapshot;
+
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
@@ -49,11 +43,11 @@ public class MainFrame extends javax.swing.JFrame {
     public MainFrame() {
         initComponents();
         
-        DefaultListModel<String> model = (DefaultListModel<String>)(ctrlMessages.getModel());
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException ex) {
-            model.addElement(ex.toString());
+            ctrlLogWin.append(ex.toString());
+            ctrlLogWin.append("\n");
         }
         
     }
@@ -86,8 +80,6 @@ public class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        ctrlMessages = new javax.swing.JList();
         jLabel1 = new javax.swing.JLabel();
         ctrlSearchRepository = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
@@ -102,6 +94,8 @@ public class MainFrame extends javax.swing.JFrame {
         ctrlBranch = new javax.swing.JComboBox();
         jLabel5 = new javax.swing.JLabel();
         ctrlFullVersion = new javax.swing.JCheckBox();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        ctrlLogWin = new javax.swing.JTextArea();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuAbout = new javax.swing.JMenuItem();
@@ -109,9 +103,6 @@ public class MainFrame extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("res/Bundle"); // NOI18N
         setTitle(bundle.getString("MainTitle")); // NOI18N
-
-        ctrlMessages.setModel(new DefaultListModel<String>());
-        jScrollPane1.setViewportView(ctrlMessages);
 
         jLabel1.setText(bundle.getString("Repository")); // NOI18N
 
@@ -163,6 +154,14 @@ public class MainFrame extends javax.swing.JFrame {
 
         jLabel5.setText("Full version:");
 
+        ctrlLogWin.setEditable(false);
+        ctrlLogWin.setColumns(100);
+        ctrlLogWin.setLineWrap(true);
+        ctrlLogWin.setRows(5);
+        ctrlLogWin.setWrapStyleWord(true);
+        ctrlLogWin.setDoubleBuffered(true);
+        jScrollPane2.setViewportView(ctrlLogWin);
+
         jMenu1.setText(bundle.getString("GitPackages.jMenu2.text")); // NOI18N
 
         jMenuAbout.setText(bundle.getString("AboutMenu")); // NOI18N
@@ -184,7 +183,6 @@ public class MainFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(ctrlStart)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -203,7 +201,7 @@ public class MainFrame extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addComponent(ctrlZipFilePrefix, javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(ctrlRepository, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(ctrlRepository, 0, 240, Short.MAX_VALUE)
                                     .addComponent(ctrlBranch, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addGap(10, 10, 10)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -214,7 +212,8 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(ctrlFullVersion)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -245,8 +244,8 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(jLabel5)
                     .addComponent(ctrlFullVersion))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(ctrlStart)
                     .addComponent(ctrlOk))
@@ -289,146 +288,15 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_ctrlSearchOutputDirActionPerformed
 
     private void ctrlStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlStartActionPerformed
-        ArrayList<String> commits = new ArrayList<>();
-        ArrayList<String> files = new ArrayList<>();
-        String wrkDir = (String)(ctrlRepository.getSelectedItem());
-        String outZipPath = wrkDir;
-        String outZipname = ctrlZipFilePrefix.getText()+"-"+ctrlIssueId.getText()+".zip";
-        String outFullZipname = ctrlZipFilePrefix.getText()+".zip";
-        DefaultListModel<String> model = (DefaultListModel<String>)(ctrlMessages.getModel());
-        model.addElement(outZipname);
-        model.addElement("");
-
-        try {
-            try {
-                ResultSet rs = Repo.fetchByNeve(wrkDir);
-                Repo adat = null;
-                if (rs.next()) {
-                    adat = new Repo(rs);
-                    adat.setIssueId(ctrlIssueId.getText());
-                    adat.setZipPrefix(ctrlZipFilePrefix.getText());
-                    adat.setBranch((String)ctrlBranch.getSelectedItem());
-                    int nr = 0;
-                    nr = adat.update();
-                } else {
-                    adat = new Repo(-1, wrkDir);
-                    adat.setIssueId(ctrlIssueId.getText());
-                    adat.setZipPrefix(ctrlZipFilePrefix.getText());
-                    adat.setBranch((String)ctrlBranch.getSelectedItem());
-                    int nr = 0;
-                    nr = adat.insert();
-                }
-            } catch (SQLException ex) {
-                model.addElement(ex.toString());
-            }
-            GitRepo repo = new GitRepo(wrkDir);
-            if (repo.getRepository().isBare()) {
-                model.addElement("git repo is bare.");
-            }
-
-            model.addElement("Comments");
-            ZipOutputStream zar = new ZipOutputStream(new FileOutputStream(outZipname));
-            ZipOutputStream zarFull = null;
-            if (ctrlFullVersion.isSelected()) {
-                zarFull = new ZipOutputStream(new FileOutputStream(outFullZipname));
-            }
-            
-            HashMap<String, RepoEntry> sumfileList = new HashMap<>();
-            int lastTimeStamp = -1;
-
-            RevCommit lastCommit = null;
-            String branch = (String)ctrlBranch.getSelectedItem();
-            HashMap<String, RevCommit> comments = repo.getComments(ctrlIssueId.getText(), branch);
-            Iterator it = comments.keySet().iterator();
-            while (it.hasNext()) {
-                String key = (String) it.next();
-                RevCommit commit = comments.get(key);
-                model.addElement(" ");
-                Date commitdate = new Date(commit.getCommitTime()*1000L);
-                DateFormat df = DateFormat.getDateTimeInstance();
-                model.addElement(df.format(commitdate));
-                model.addElement(commit.getFullMessage());
-                String zipdirpref = new Integer(commit.getCommitTime()).toString();
-
-                HashMap<ObjectId, String> fileList = repo.getFilelistForComment(commit);
-                for (ObjectId fname : fileList.keySet()) {
-                    //byte[] tartalom = repo.open(fname);
-                    // zar.putNextEntry(new ZipEntry(zipdirpref+File.separator+fileList.get(fname)));
-                    //zar.write(tartalom, 0, tartalom.length);
-                    //zar.closeEntry();
-                    if (lastTimeStamp < commit.getCommitTime()) {
-                        //model.addElement("*"+zipdirpref+File.separator+fileList.get(fname));
-                        RepoEntry entry = new RepoEntry(fileList.get(fname), 
-                                fname, 
-                                commit.getCommitTime());
-                        sumfileList.put(fileList.get(fname), entry);
-                    } else {
-                        if (!sumfileList.containsKey(fileList.get(fname))) {
-                            //model.addElement("+"+zipdirpref+File.separator+fileList.get(fname));
-                            RepoEntry entry = new RepoEntry(fileList.get(fname), 
-                                    fname, 
-                                    commit.getCommitTime());
-                            sumfileList.put(fileList.get(fname), entry);
-                        } else {
-                          RepoEntry entry = sumfileList.get(fileList.get(fname));
-                          if (entry.getCommitTime() < commit.getCommitTime()) {
-                            entry = new RepoEntry(fileList.get(fname), 
-                                    fname, 
-                                    commit.getCommitTime());
-                            sumfileList.put(fileList.get(fname), entry);
-                            //model.addElement("*"+zipdirpref+File.separator+fileList.get(fname));
-//                          } else {
-//                            model.addElement("-"+zipdirpref+File.separator+fileList.get(fname));
-                          }
-                        }
-                    }
-                }
-                if (lastCommit == null) {
-                    lastTimeStamp = commit.getCommitTime();
-                    lastCommit = commit;
-                } else {
-                    if (commit.getCommitTime() > lastCommit.getCommitTime()) {
-                        lastCommit = commit;
-                        lastTimeStamp = commit.getCommitTime();
-                    }
-                }
-            }
-            model.addElement("Files:");
-            for (String fname : sumfileList.keySet()) {
-                model.addElement(fname);
-                byte[] tartalom = repo.open(sumfileList.get(fname).getObjectId());
-                zar.putNextEntry(new ZipEntry(fname));
-                zar.write(tartalom, 0, tartalom.length);
-                zar.closeEntry();
-            }
-            zar.close();
-            if (zarFull != null) {
-                TreeWalk treeWalk = new TreeWalk(repo.getRepository());
-                treeWalk.addTree(lastCommit.getTree());
-                treeWalk.setRecursive(true);
-                model.addElement("Full version Files:");
-
-                while(treeWalk.next()){
-                    if (!treeWalk.getPathString().contains(".gitignore")) {
-                        model.addElement(treeWalk.getPathString());
-                        
-                        ObjectId objId = treeWalk.getObjectId(0);
-                        if (objId == null) {
-                            model.addElement("not resolved");
-                        } else {
-                            byte[] tartalom = repo.open(objId);
-                            zarFull.putNextEntry(new ZipEntry(treeWalk.getPathString()));
-                            zarFull.write(tartalom, 0, tartalom.length);
-                            zarFull.closeEntry();
-                        }
-                    }
-                }  
-                zarFull.close();
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            model.addElement(ex.toString());
-        }
+        
+        ctrlLogWin.setText("");
+        MakeGitSnapshot mk = new MakeGitSnapshot(  ctrlRepository,
+                                                   ctrlZipFilePrefix,
+                                                   ctrlIssueId,
+                                                   ctrlBranch,
+                                                   ctrlFullVersion,
+                                                   ctrlLogWin);
+        mk.execute();
     }//GEN-LAST:event_ctrlStartActionPerformed
 
     private void ctrlOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlOkActionPerformed
@@ -439,7 +307,6 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void ctrlRepositoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlRepositoryActionPerformed
       // TODO add your handling code here:
-      DefaultListModel<String> model = (DefaultListModel<String>) ctrlMessages.getModel();
       try {
         String wrkDir = (String)ctrlRepository.getSelectedItem();
         ResultSet rs = Repo.fetchByNeve(wrkDir);
@@ -516,7 +383,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox ctrlBranch;
     private javax.swing.JCheckBox ctrlFullVersion;
     private javax.swing.JTextField ctrlIssueId;
-    private javax.swing.JList ctrlMessages;
+    private javax.swing.JTextArea ctrlLogWin;
     private javax.swing.JButton ctrlOk;
     private javax.swing.JComboBox ctrlRepository;
     private javax.swing.JButton ctrlSearchOutputDir;
@@ -531,6 +398,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuItem jMenuAbout;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
 }
