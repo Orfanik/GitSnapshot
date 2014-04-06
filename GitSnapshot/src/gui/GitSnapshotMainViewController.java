@@ -149,9 +149,9 @@ public class GitSnapshotMainViewController {
         }
         ctrlBranch.setItems(branchList);
       } catch (SQLException ex) {
-        Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        Logger.getLogger(GitSnapshotMain.class.getName()).log(Level.SEVERE, null, ex);
       } catch (IOException ex) {
-        Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        Logger.getLogger(GitSnapshotMain.class.getName()).log(Level.SEVERE, null, ex);
       }
     }
 
@@ -212,7 +212,7 @@ public class GitSnapshotMainViewController {
           }
           ctrlRepository.setItems(repoList);
         } catch (SQLException ex) {
-          Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+          Logger.getLogger(GitSnapshotMain.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

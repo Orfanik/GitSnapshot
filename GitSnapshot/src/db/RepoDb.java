@@ -4,7 +4,6 @@
  */
 package db;
 
-import gui.MainFrame;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -7,7 +7,7 @@
 package model.action;
 
 import git.GitRepo;
-import gui.MainFrame;
+import gui.GitSnapshotMain;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -192,7 +192,7 @@ public class MakeGitSnapshot extends javafx.concurrent.Task<String> {
             zar.setComment(lastCommit.getFullMessage());
             zar.close();
         } catch (IOException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GitSnapshotMain.class.getName()).log(Level.SEVERE, null, ex);
             publish(ex.toString());
         }
         return (outZipname);
