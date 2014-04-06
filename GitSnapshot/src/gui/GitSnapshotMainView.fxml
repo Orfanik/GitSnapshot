@@ -8,9 +8,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
-<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="545.0000999999975" prefWidth="363.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="gui.GitSnapshotMainViewController">
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0000999999975" prefWidth="465.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="gui.GitSnapshotMainViewController">
   <children>
-    <MenuBar layoutX="14.0" layoutY="14.0" maxWidth="1.7976931348623157E308" prefWidth="336.0000999999975">
+    <MenuBar layoutY="14.0" maxWidth="1.7976931348623157E308" prefWidth="336.0000999999975" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="12.0">
       <menus>
         <Menu mnemonicParsing="false" text="Help">
           <items>
@@ -19,48 +19,30 @@
         </Menu>
       </menus>
     </MenuBar>
-    <GridPane layoutX="11.0" layoutY="53.0" maxWidth="1.7976931348623157E308" prefHeight="169.0" prefWidth="352.0">
-      <children>
-        <Label text="Repository:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-        <ComboBox id="IdRepository" fx:id="ctrlRepository" editable="true" onAction="#onRepositoryChanged" prefHeight="21.0" prefWidth="173.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
-        </ComboBox>
-        <Button id="IdSearchRepository" fx:id="ctrlSearchRepository" contentDisplay="CENTER" mnemonicParsing="false" onAction="#OnSearchRepository" prefWidth="63.0" style="" styleClass="searchButton" text="Search" GridPane.columnIndex="2" GridPane.rowIndex="0">
-          <stylesheets>
-            <URL value="@../res/gitsnapshotmainview.css" />
-          </stylesheets>
-        </Button>
-        <Label text="Branch:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-        <ComboBox id="idBranch" fx:id="ctrlBranch" onAction="#onBranchChanged" prefHeight="21.0" prefWidth="173.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-        </ComboBox>
-        <Label text="Issue Id:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-        <TextField id="idIssueId" fx:id="ctrlIssueId" prefWidth="173.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        <Label text="Zip file prefix:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-        <TextField id="idZipFilePrefix" fx:id="ctrlZipFilePrefix" prefWidth="173.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-        <Button id="IdSearchZipLocation" fx:id="ctrlSearchZipLocation" mnemonicParsing="false" onAction="#onZipFilePrefixSearch" text="Search" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-        <Label text="Full version:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-        <CheckBox id="idFullVersion" fx:id="ctrlFullVersion" mnemonicParsing="false" selected="true" text="" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-      </children>
-      <columnConstraints>
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="100.0" />
-        <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-      </columnConstraints>
-      <rowConstraints>
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      </rowConstraints>
-    </GridPane>
     <VBox id="VBox" alignment="CENTER" layoutX="283.0" layoutY="55.0" spacing="5.0">
       <stylesheets>
         <URL value="@../res/gitsnapshotmainview.css" />
       </stylesheets>
     </VBox>
-    <TextArea fx:id="ctrlLogWin" editable="false" layoutX="12.0" layoutY="222.0" maxHeight="1.7976931348623157E308" prefHeight="270.0" prefWidth="335.0" wrapText="true" />
-    <Button id="IdClose" fx:id="ctrlClose" layoutX="300.0" layoutY="504.0" mnemonicParsing="false" onAction="#OnCloseButton" text="Close" />
-    <Button id="IsStart" fx:id="ctrlStart" layoutX="11.0" layoutY="504.0" mnemonicParsing="false" onAction="#OnStartButton" text="Start" />
+    <TextArea fx:id="ctrlLogWin" editable="false" maxHeight="1.7976931348623157E308" prefHeight="409.0000999999975" prefWidth="335.0" wrapText="true" AnchorPane.bottomAnchor="53.0" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="16.0" AnchorPane.topAnchor="204.0" />
+    <Button id="IdClose" fx:id="ctrlClose" mnemonicParsing="false" onAction="#OnCloseButton" text="Close" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="14.0" />
+    <Button id="IsStart" fx:id="ctrlStart" layoutX="11.0" mnemonicParsing="false" onAction="#OnStartButton" text="Start" AnchorPane.bottomAnchor="20.0" />
+    <Label layoutX="14.0" layoutY="53.0" text="Repository:" />
+    <Label layoutX="14.0" layoutY="85.0" text="Branch:" />
+    <Label layoutX="14.0" layoutY="114.0" text="Issue Id:" />
+    <Label layoutX="14.0" layoutY="145.0" text="Zip file prefix:" />
+    <Label layoutX="14.0" layoutY="178.0" text="Full version:" />
+    <ComboBox id="IdRepository" fx:id="ctrlRepository" editable="true" layoutY="48.0" onAction="#onRepositoryChanged" prefHeight="21.0" prefWidth="173.0" AnchorPane.leftAnchor="93.0" AnchorPane.rightAnchor="97.0" />
+    <ComboBox id="idBranch" fx:id="ctrlBranch" layoutY="80.0" onAction="#onBranchChanged" prefHeight="21.0" prefWidth="173.0" AnchorPane.leftAnchor="93.0" AnchorPane.rightAnchor="97.0" />
+    <TextField id="idIssueId" fx:id="ctrlIssueId" layoutY="111.0" prefWidth="173.0" AnchorPane.leftAnchor="93.0" AnchorPane.rightAnchor="97.0" />
+    <TextField id="idZipFilePrefix" fx:id="ctrlZipFilePrefix" layoutY="145.0" prefWidth="173.0" AnchorPane.leftAnchor="93.0" AnchorPane.rightAnchor="97.0" />
+    <CheckBox id="idFullVersion" fx:id="ctrlFullVersion" layoutX="93.0" layoutY="175.0" mnemonicParsing="false" selected="true" text="" />
+    <Button id="IdSearchRepository" fx:id="ctrlSearchRepository" contentDisplay="CENTER" layoutY="45.0" mnemonicParsing="false" onAction="#OnSearchRepository" prefWidth="63.0" style="" styleClass="searchButton" text="Search" AnchorPane.rightAnchor="14.0">
+      <stylesheets>
+        <URL value="@../res/gitsnapshotmainview.css" />
+      </stylesheets>
+    </Button>
+    <Button id="IdSearchZipLocation" fx:id="ctrlSearchZipLocation" layoutY="145.0" mnemonicParsing="false" onAction="#onZipFilePrefixSearch" prefWidth="63.0" text="Search" AnchorPane.rightAnchor="14.0" />
   </children>
   <stylesheets>
     <URL value="@../res/gitsnapshotmainview.css" />

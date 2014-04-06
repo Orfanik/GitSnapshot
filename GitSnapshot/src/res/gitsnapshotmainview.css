@@ -6,9 +6,9 @@
 
 }
 
-.searchButton {
-    -fx-background-image: url("@/res/orange_folder_saved_search_16");
-    -fx-background-size: 18 18;
+.searchButtonTest {
+    -fx-background-image: url("orange_folder_saved_search_16.png");
+    -fx-background-size: 100%;
     -fx-background-repeat: no-repeat;
     -fx-background-position:left; 
 }
