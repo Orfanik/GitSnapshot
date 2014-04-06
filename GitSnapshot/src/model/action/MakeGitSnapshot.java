@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javafx.application.Platform;
 import javax.swing.DefaultListModel;
 import javax.swing.SwingWorker;
 import model.Repo;
@@ -34,20 +35,20 @@ import org.eclipse.jgit.treewalk.TreeWalk;
  *
  * @author U292156
  */
-public class MakeGitSnapshot extends SwingWorker<String, String> {
-    private javax.swing.JComboBox ctrlRepository;
-    private javax.swing.JTextField ctrlZipFilePrefix;
-    private javax.swing.JTextField ctrlIssueId;
-    private javax.swing.JComboBox ctrlBranch;
-    private javax.swing.JCheckBox ctrlFullVersion;
-    private javax.swing.JTextArea ctrlLogWin;
+public class MakeGitSnapshot extends javafx.concurrent.Task<String> {
+    private javafx.scene.control.ComboBox ctrlRepository;
+    private javafx.scene.control.TextField ctrlZipFilePrefix;
+    private javafx.scene.control.TextField ctrlIssueId;
+    private javafx.scene.control.ComboBox ctrlBranch;
+    private javafx.scene.control.CheckBox ctrlFullVersion;
+    private javafx.scene.control.TextArea ctrlLogWin;
     
-    public MakeGitSnapshot(javax.swing.JComboBox ctrlRepository,
-            javax.swing.JTextField ctrlZipFilePrefix,
-            javax.swing.JTextField ctrlIssueId,
-            javax.swing.JComboBox ctrlBranch,
-            javax.swing.JCheckBox ctrlFullVersion,
-            javax.swing.JTextArea ctrlLogWin) {
+    public MakeGitSnapshot(javafx.scene.control.ComboBox ctrlRepository,
+            javafx.scene.control.TextField ctrlZipFilePrefix,
+            javafx.scene.control.TextField ctrlIssueId,
+            javafx.scene.control.ComboBox ctrlBranch,
+            javafx.scene.control.CheckBox ctrlFullVersion,
+            javafx.scene.control.TextArea ctrlLogWin) {
         this.ctrlRepository = ctrlRepository;
         this.ctrlZipFilePrefix = ctrlZipFilePrefix;
         this.ctrlIssueId = ctrlIssueId;
@@ -57,12 +58,10 @@ public class MakeGitSnapshot extends SwingWorker<String, String> {
     }
 
     @Override
-    protected String doInBackground() throws Exception {
-        
-        
+    protected String call() throws Exception {
         ArrayList<String> commits = new ArrayList<>();
         ArrayList<String> files = new ArrayList<>();
-        String wrkDir = (String)(ctrlRepository.getSelectedItem());
+        String wrkDir = (String)(ctrlRepository.getValue());
         String outZipPath = wrkDir;
         String outZipname = ctrlZipFilePrefix.getText()+"-"+ctrlIssueId.getText()+".zip";
         publish(outZipname);
@@ -75,14 +74,14 @@ public class MakeGitSnapshot extends SwingWorker<String, String> {
                     adat = new Repo(rs);
                     adat.setIssueId(ctrlIssueId.getText());
                     adat.setZipPrefix(ctrlZipFilePrefix.getText());
-                    adat.setBranch((String)ctrlBranch.getSelectedItem());
+                    adat.setBranch((String)ctrlBranch.getValue());
                     int nr = 0;
                     nr = adat.update();
                 } else {
                     adat = new Repo(-1, wrkDir);
                     adat.setIssueId(ctrlIssueId.getText());
                     adat.setZipPrefix(ctrlZipFilePrefix.getText());
-                    adat.setBranch((String)ctrlBranch.getSelectedItem());
+                    adat.setBranch((String)ctrlBranch.getValue());
                     int nr = 0;
                     nr = adat.insert();
                 }
@@ -97,14 +96,11 @@ public class MakeGitSnapshot extends SwingWorker<String, String> {
             publish("Comments");
             ZipOutputStream zar = new ZipOutputStream(new FileOutputStream(outZipname));
             
-            //ctrlMessages.revalidate();
-            //ctrlMessages.repaint();
-            
             HashMap<String, RepoEntry> sumfileList = new HashMap<>();
             int lastTimeStamp = -1;
 
             RevCommit lastCommit = null;
-            String branch = (String)ctrlBranch.getSelectedItem();
+            String branch = (String)ctrlBranch.getValue();
             HashMap<String, RevCommit> comments = repo.getComments(ctrlIssueId.getText(), branch);
             Iterator it = comments.keySet().iterator();
             while (it.hasNext()) {
@@ -159,8 +155,6 @@ public class MakeGitSnapshot extends SwingWorker<String, String> {
                         lastTimeStamp = commit.getCommitTime();
                     }
                 }
-                //ctrlMessages.revalidate();
-                //ctrlMessages.repaint();
 
             }
             publish("Files:");
@@ -184,8 +178,6 @@ public class MakeGitSnapshot extends SwingWorker<String, String> {
                             zar.closeEntry();
                         }
                     }
-                    //ctrlMessages.revalidate();
-                    //ctrlMessages.repaint();
 
                 }  
             } else {
@@ -195,8 +187,6 @@ public class MakeGitSnapshot extends SwingWorker<String, String> {
                     zar.putNextEntry(new ZipEntry(fname));
                     zar.write(tartalom, 0, tartalom.length);
                     zar.closeEntry();
-                    //ctrlMessages.revalidate();
-                    //ctrlMessages.repaint();
                 }
             }
             zar.setComment(lastCommit.getFullMessage());
@@ -208,13 +198,13 @@ public class MakeGitSnapshot extends SwingWorker<String, String> {
         return (outZipname);
     }
 
-    @Override
-    protected void process(List<String> chunks) {
-        super.process(chunks); //To change body of generated methods, choose Tools | Templates.
-        for (String message : chunks) {  
-            ctrlLogWin.append(message);
-            ctrlLogWin.append("\n");
-        }
+    protected void publish(final String message) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                ctrlLogWin.appendText(message+"\n");                                    
+            }
+        }); 
     }
-    
+
 }

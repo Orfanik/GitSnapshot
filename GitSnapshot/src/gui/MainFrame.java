@@ -290,13 +290,13 @@ public class MainFrame extends javax.swing.JFrame {
     private void ctrlStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlStartActionPerformed
         
         ctrlLogWin.setText("");
-        MakeGitSnapshot mk = new MakeGitSnapshot(  ctrlRepository,
-                                                   ctrlZipFilePrefix,
-                                                   ctrlIssueId,
-                                                   ctrlBranch,
-                                                   ctrlFullVersion,
-                                                   ctrlLogWin);
-        mk.execute();
+        //MakeGitSnapshot mk = new MakeGitSnapshot(  ctrlRepository,
+        //                                           ctrlZipFilePrefix,
+        //                                           ctrlIssueId,
+        //                                           ctrlBranch,
+        //                                           ctrlFullVersion,
+        //                                           ctrlLogWin);
+        //mk.execute();
     }//GEN-LAST:event_ctrlStartActionPerformed
 
     private void ctrlOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ctrlOkActionPerformed
