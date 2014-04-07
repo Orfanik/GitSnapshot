@@ -2,10 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group name="gittools">
-            <file>file:/D:/lsyh/GitSnapshot/GitSnapshot/src/model/action/MakeGitSnapshot.java</file>
-            <file>file:/D:/lsyh/GitSnapshot/GitSnapshot/src/gui/MainFrame.java</file>
-        </group>
         <group>
             <file>file:/E:/projects/gitsnapshot/GitSnapshot/src/model/Adat.java</file>
             <file>file:/E:/projects/gitsnapshot/GitSnapshot/src/gui/GitSnapshotMain.java</file>
@@ -14,6 +10,9 @@
             <file>file:/E:/projects/gitsnapshot/GitSnapshot/src/res/gitsnapshotmainview.css</file>
             <file>file:/E:/projects/gitsnapshot/GitSnapshot/src/model/action/MakeGitSnapshot.java</file>
             <file>file:/E:/projects/gitsnapshot/GitSnapshot/src/gui/GitSnapshotMainView.fxml</file>
+        </group>
+        <group name="gittools">
+            <file>file:/D:/lsyh/GitSnapshot/GitSnapshot/src/gui/GitSnapshotMainView.fxml</file>
         </group>
     </open-files>
 </project-private>

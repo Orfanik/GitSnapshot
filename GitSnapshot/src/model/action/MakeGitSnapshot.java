@@ -195,6 +195,7 @@ public class MakeGitSnapshot extends javafx.concurrent.Task<String> {
             Logger.getLogger(GitSnapshotMain.class.getName()).log(Level.SEVERE, null, ex);
             publish(ex.toString());
         }
+        publish("Finished.");
         return (outZipname);
     }
 
