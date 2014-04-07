@@ -11,9 +11,9 @@
   </resources>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="GitSnapshot.jar" size="44840" download="eager" />
+    <jar href="GitSnapshot.jar" size="44842" download="eager" />
     <jar href="lib/commons-io-2.4.jar" size="185140" download="eager" />
-    <jar href="lib/org.eclipse.jgit-3.0.3.201309161630-r.jar" size="1815379" download="eager" />
+    <jar href="lib/org.eclipse.jgit-3.3.1.201403241930-r.jar" size="1872719" download="eager" />
     <jar href="lib/sqlite-jdbc-3.7.2.jar" size="3201128" download="eager" />
   </resources>
   <applet-desc  width="800" height="600" main-class="com.javafx.main.NoJavaFXFallback"  name="GitSnapshot" >
